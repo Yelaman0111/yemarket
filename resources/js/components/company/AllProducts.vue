@@ -64,7 +64,7 @@
                 }"
                 class="page-link me-3"
               >
-                <IconsChevronLeft />
+                <ChevronLeft />
               </router-link>
             </li>
 
@@ -92,7 +92,7 @@
                 }"
                 class="page-link ms-3"
               >
-                <IconsChevronRight />
+                <ChevronRight />
               </router-link>
             </li>
             <li>
@@ -121,12 +121,16 @@ import useProduct from "../../composables/product";
 import { onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { watch } from "vue";
+import ChevronRight from "../Icons/ChevronRight";
+import ChevronLeft from "../Icons/ChevronLeft";
 
 import { useCookies } from "vue3-cookies";
 
 export default {
   components: {
     LeftMenu,
+    ChevronLeft,
+    ChevronRight,
     ProductCardInCreate,
   },
 

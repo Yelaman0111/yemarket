@@ -30,7 +30,7 @@
                     placeholder="Начните вводить название продукта"
                   />
                   <button type="submit" class="btn border btn-gray">
-                    <IconsSearch />
+                    <Search />
                   </button>
                 </div>
               </form>
@@ -73,7 +73,7 @@
                   }"
                   class="page-link me-3"
                 >
-                  <IconsChevronLeft />
+                  <ChevronLeft />
                 </router-link>
               </li>
 
@@ -101,7 +101,7 @@
                   }"
                   class="page-link ms-3"
                 >
-                  <IconsChevronRight />
+                  <ChevronRight />
                 </router-link>
               </li>
               <li>
@@ -130,10 +130,17 @@ import useAuth from "../../composables/company";
 import { useCookies } from "vue3-cookies";
 import { useRoute } from "vue-router";
 import { watch } from "vue";
+import ChevronRight from "../Icons/ChevronRight";
+import ChevronLeft from "../Icons/ChevronLeft";
+import Search from "../Icons/Search";
+
 export default {
   components: {
     LeftMenu,
     ProductInListCompany,
+    ChevronLeft,
+    ChevronRight,
+    Search
   },
   name: "CompanyIndex",
 

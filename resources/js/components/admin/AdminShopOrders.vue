@@ -32,7 +32,7 @@
               :to="'/admin/companyOrders?page=' + getPreviosPageNumber"
               class="page-link me-3"
             >
-              <IconsChevronLeft />
+              <ChevronLeft />
             </nuxt-link>
           </li>
 
@@ -63,7 +63,7 @@
               "
               class="page-link ms-3"
             >
-              <IconsChevronRight />
+              <ChevronRight />
             </nuxt-link>
           </li>
           <li>
@@ -91,11 +91,13 @@ import useAdmin from "../../composables/admin";
 import { useRoute } from "vue-router";
 import { watch } from "vue";
 import { onMounted } from "vue";
+import ChevronLeft from "../Icons/ChevronLeft";
+import ChevronRight from "../Icons/ChevronRight";
 
 export default {
   components: {
     ShopOrderItem,
-    LeftMenu,
+    LeftMenu,ChevronRight,ChevronLeft
   },
 
   data() {
