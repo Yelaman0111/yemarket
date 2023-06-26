@@ -10,6 +10,7 @@ Route::group(['prefix' => 'v1'], function () {
     Route::get('products/brands/{id}', [App\Http\Controllers\Api\PublicController::class, 'getProductsByBrand']);
     Route::get('products/company/{id}', [App\Http\Controllers\Api\PublicController::class, 'getProductsByCompany']);
     Route::post('products/search', [App\Http\Controllers\Api\PublicController::class, 'searchProducts']);
+    Route::get('products/{id}', [App\Http\Controllers\Api\PublicController::class, 'getSpecificProduct']);
     Route::get('corousel', [App\Http\Controllers\Api\PublicController::class, 'getCorousel']);
     Route::get('companies/all',  [App\Http\Controllers\Api\PublicController::class, 'getCompaniesForMainPage'])->name('getCompaniesForMainPage');
 

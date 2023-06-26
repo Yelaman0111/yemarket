@@ -160,4 +160,20 @@ class ProductService
             }])
             ->paginate();
     }
+
+    public function getSpecificProduct($id)
+    {
+        return Product::where('approved', '1')
+            ->where('id', $id)
+            ->whereHas('companiesProduct', function ($query) {
+                $query->where('approved', '1');
+            })
+            ->with(['companiesProduct.company', 'companiesProduct' => function ($query) {
+                $query->orderBy('price', 'asc');
+                $query->where('approved', '1');
+            }])
+            ->with('brand')
+            ->with('category')
+            ->get();
+    }
 }

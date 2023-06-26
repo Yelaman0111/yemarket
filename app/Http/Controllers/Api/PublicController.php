@@ -50,4 +50,11 @@ class PublicController extends Controller
     {
         return CorouselResource::collection(Corousel::all());
     }
+
+    public function getSpecificProduct($id, ProductService $service)
+    {
+
+        return new ProductResource($service->getSpecificProduct($id));
+
+    }
 }
