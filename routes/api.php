@@ -13,7 +13,7 @@ Route::group(['prefix' => 'v1'], function () {
     Route::get('products/{id}', [App\Http\Controllers\Api\PublicController::class, 'getSpecificProduct']);
     Route::get('corousel', [App\Http\Controllers\Api\PublicController::class, 'getCorousel']);
     Route::get('companies/all',  [App\Http\Controllers\Api\PublicController::class, 'getCompaniesForMainPage'])->name('getCompaniesForMainPage');
-
+    Route::post('shoppingcart', [App\Http\Controllers\Api\PublicController::class, 'getShoppingCart'])->name('getShoppingCart');
 
     Route::group(['prefix' => 'admin'], function () {
 

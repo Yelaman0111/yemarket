@@ -9,9 +9,11 @@ use App\Http\Resources\CategoryResource;
 use App\Http\Resources\CompanyResource;
 use App\Http\Resources\CorouselResource;
 use App\Http\Resources\ProductResource;
+use App\Models\Company;
 use App\Models\Corousel;
 use App\Services\CompanyService;
 use App\Services\ProductService;
+use Illuminate\Http\Request;
 
 class PublicController extends Controller
 {
@@ -53,8 +55,17 @@ class PublicController extends Controller
 
     public function getSpecificProduct($id, ProductService $service)
     {
-
         return new ProductResource($service->getSpecificProduct($id));
+    }
 
+    public function getShoppingCart(Request $request, CompanyService $service)
+    {
+        return Company::whereHas('products', function ($query) use ($request) {
+            $query->whereIn('id', explode(',', $request->products_id));
+        })->with(['products' => function ($query) use ($request) {
+            $query->whereIn('id', explode(',', $request->products_id));
+            $query->with('product');
+        }])
+            ->get();
     }
 }
