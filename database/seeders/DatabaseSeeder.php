@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Corousel;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -16,6 +17,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             CategorySeeder::class,
             BrandSeeder::class,
+            CompanySeeder::class,
+            ProductCompanySeeder::class,
+            ProductSeeder::class,
+            CorouselSeeder::class,
         ]);
     }
 }
