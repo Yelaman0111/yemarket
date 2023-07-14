@@ -33,7 +33,7 @@ export default {
   computed: {
     getImagePath() {
       console.log(this.product);
-      return "http://localhost/uploads/products/" + this.product.image;
+      return "https://yemarket.kz/uploads/products/" + this.product.image;
     },
   },
 };

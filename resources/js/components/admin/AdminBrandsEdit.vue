@@ -134,7 +134,7 @@ export default {
   },
   computed: {
     getImagePath() {
-      return "http://localhost/uploads/brands/" + this.brnad_image;
+      return "https://yemarket.kz/uploads/brands/" + this.brnad_image;
     },
   },
   methods: {

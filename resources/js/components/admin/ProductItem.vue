@@ -84,7 +84,7 @@ export default {
     },
 
     getImagePath() {
-      return "http://localhost/uploads/products/" + this.product.image;
+      return "https://yemarket.kz/uploads/products/" + this.product.image;
     },
   },
   data() {

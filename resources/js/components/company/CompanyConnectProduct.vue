@@ -242,7 +242,7 @@ export default {
   },
   computed: {
     getImagePath() {
-      return "http://localhost/uploads/products/" + this.image;
+      return "https://yemarket.kz/uploads/products/" + this.image;
     },
     setSelectedParentCategory() {
       this.categoriesAll.forEach((parentCategory, index) => {

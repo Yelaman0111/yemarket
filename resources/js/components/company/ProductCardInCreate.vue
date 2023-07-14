@@ -27,7 +27,7 @@ export default {
   props: ["product", "id"],
   computed: {
     getImagePath() {
-      return "http://localhost/uploads/products/" + this.product.image;
+      return "https://yemarket.kz/uploads/products/" + this.product.image;
     },
   },
 };

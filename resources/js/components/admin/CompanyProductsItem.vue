@@ -62,7 +62,7 @@ export default {
       return this.approved ? "Да" : "Нет";
     },
     getImagePath() {
-      return "http://localhost/uploads/products/" + this.product.product.image;
+      return "https://yemarket.kz/uploads/products/" + this.product.product.image;
     },
   },
 

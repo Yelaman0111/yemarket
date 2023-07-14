@@ -20031,7 +20031,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   computed: {
     getImagePath: function getImagePath() {
-      return "http://localhost/uploads/brands/" + this.brnad_image;
+      return "https://yemarket.kz/uploads/brands/" + this.brnad_image;
     }
   },
   methods: {
@@ -20313,7 +20313,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   methods: {
     getImagePath: function getImagePath(name) {
-      return "http://localhost/uploads/category/" + name;
+      return "https://yemarket.kz/uploads/category/" + name;
     },
     handleFileUpload: function handleFileUpload(event) {
       this.file = event.target.files[0];
@@ -21023,7 +21023,7 @@ __webpack_require__.r(__webpack_exports__);
   props: ["brand"],
   methods: {
     getImagePath: function getImagePath(image_name) {
-      return "http://localhost/uploads/brands/" + image_name;
+      return "https://yemarket.kz/uploads/brands/" + image_name;
     }
   }
 });
@@ -21047,7 +21047,7 @@ __webpack_require__.r(__webpack_exports__);
   created: function created() {},
   methods: {
     getImagePath: function getImagePath(image_name) {
-      return "http://localhost/uploads/category/" + image_name;
+      return "https://yemarket.kz/uploads/category/" + image_name;
     }
   },
   computed: {},
@@ -21241,7 +21241,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       return this.approved ? "Да" : "Нет";
     },
     getImagePath: function getImagePath() {
-      return "http://localhost/uploads/products/" + this.product.product.image;
+      return "https://yemarket.kz/uploads/products/" + this.product.product.image;
     }
   },
   data: function data() {
@@ -21346,7 +21346,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       return this.approved ? "Да" : "Нет";
     },
     getImagePath: function getImagePath() {
-      return "http://localhost/uploads/products/" + this.product.image;
+      return "https://yemarket.kz/uploads/products/" + this.product.image;
     }
   },
   data: function data() {
@@ -21823,7 +21823,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   computed: {
     getImagePath: function getImagePath() {
-      return "http://localhost/uploads/products/" + this.image;
+      return "https://yemarket.kz/uploads/products/" + this.image;
     },
     setSelectedParentCategory: function setSelectedParentCategory() {
       var _this = this;
@@ -22499,7 +22499,7 @@ __webpack_require__.r(__webpack_exports__);
   props: ["product", "id"],
   computed: {
     getImagePath: function getImagePath() {
-      return "http://localhost/uploads/products/" + this.product.image;
+      return "https://yemarket.kz/uploads/products/" + this.product.image;
     }
   }
 });
@@ -22523,7 +22523,7 @@ __webpack_require__.r(__webpack_exports__);
   computed: {
     getImagePath: function getImagePath() {
       console.log(this.product);
-      return "http://localhost/uploads/products/" + this.product.image;
+      return "https://yemarket.kz/uploads/products/" + this.product.image;
     }
   }
 });
@@ -22603,7 +22603,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   computed: {
     getImagePath: function getImagePath() {
-      return "http://localhost/uploads/products/" + this.image;
+      return "https://yemarket.kz/uploads/products/" + this.image;
     },
     setSelectedParentCategory: function setSelectedParentCategory() {
       var _this = this;

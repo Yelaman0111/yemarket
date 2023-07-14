@@ -168,7 +168,7 @@ export default {
   },
   methods: {
     getImagePath(name) {
-      return "http://localhost/uploads/category/" + name;
+      return "https://yemarket.kz/uploads/category/" + name;
     },
     handleFileUpload(event) {
       this.file = event.target.files[0];

@@ -84,7 +84,7 @@ export default {
   created() {},
   methods: {
     getImagePath(image_name) {
-      return "http://localhost/uploads/category/" + image_name;
+      return "https://yemarket.kz/uploads/category/" + image_name;
     },
   },
   computed: {},
