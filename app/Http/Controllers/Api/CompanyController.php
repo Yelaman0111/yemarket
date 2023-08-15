@@ -14,36 +14,23 @@ use App\Http\Resources\CompanyResource;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\ProductResource;
 use App\Models\Brand;
-use App\Models\Company;
-use App\Models\ProductCompany;
 use App\Services\CategoryService;
 use App\Services\CompanyService;
 use App\Services\OrderService;
 use App\Services\ProductCompanyService;
 use App\Services\ProductService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class CompanyController extends Controller
 {
     public function store(CompanyRequest $request, CompanyService $service)
     {
-        $company = $service->storeCompany($request);
-        return new CompanyResource($company);
+        return new CompanyResource($service->storeCompany($request));
     }
 
-    public function companyLogin()
+    public function companyLogin(CompanyService $service)
     {
-        $credentials = request(['email', 'password']);
-        $myTTL = 60 * 24 * 30; //minutes
-
-        JWTAuth::factory()->setTTL($myTTL);
-        if (!$token = auth()->guard('company-api')->attempt($credentials, ['exp' => Carbon::now()->addDays(30)->timestamp])) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
-        return $token;
+        return $service->companyLogin();
     }
 
     public function show()
@@ -56,21 +43,14 @@ class CompanyController extends Controller
         return $service->updateCompany($request);
     }
 
-
     public function getCompanyAllProducts(ProductService $service)
     {
-        $company_id = auth()->guard('company-api')->user()->id;
-
-        $products = $service->getCompanyAllProducts($company_id);
-
-        return new ProductResource($products);
+        return new ProductResource($service->getCompanyAllProducts());
     }
 
     public function getApprovedProductsWithoutCompanyProducts(ProductService $service)
     {
-        $products = $service->getApprovedProductsWithoutCompanyProducts();
-
-        return new ProductResource($products);
+        return new ProductResource($service->getApprovedProductsWithoutCompanyProducts());
     }
 
     public function getAllCategories(CategoryService $service)
@@ -88,51 +68,35 @@ class CompanyController extends Controller
         return new ProductResource($service->storeProduct($request));
     }
 
-
     public function connectToProduct(ProductCompanyRequest $request, ProductCompanyService $service)
     {
-        $company_id = auth()->guard('company-api')->user()->id;
-
-        $service->storeProductCompany($request,  $company_id);
+        $service->storeProductCompany($request);
 
         response()->json(['success' => 'success'], 200);
     }
 
     public function searchProductOfCompany(SearchProdutsRequest $request, ProductService $service)
     {
-        $company_id = auth()->guard('company-api')->user()->id;
-        return $service->searchProductOfCompany($request->search_text, $company_id);
+        return $service->searchProductOfCompany($request->search_text);
     }
 
     public function searchProductForConnect(Request $request, ProductService $service)
     {
-        if ($request->search_text != '') {
-            return $service->searchProductForConnect($request->search_text);
-        } else {
-            return response()->noContent();
-        }
+        return $service->searchProductForConnect($request->search_text);
     }
 
-    public function getCompanyOrders(Request $request, OrderService $service)
+    public function getCompanyOrders(OrderService $service)
     {
-        $company_id = auth()->guard('company-api')->user()->id;
-
-        return OrderResource::collection($service->getCompanyOrders($company_id));
+        return OrderResource::collection($service->getCompanyOrders());
     }
 
     public function ordersAccept(Request $request, OrderService $service)
     {
-        $company_id = auth()->guard('company-api')->user()->id;
-        $order_id = $request->id;
-
-        return  $service->acceptOrder($order_id, $company_id);
+        return  $service->acceptOrder($request);
     }
 
     public function downloadOrder($order_id, OrderService $service)
     {
-        $company_id = auth()->guard('company-api')->user()->id;
-
-        return $service->downloadOrder($order_id, $company_id);
-        // return $service->downloadOrder($order_id, $company_id);
+        return $service->downloadOrder($order_id);
     }
 }

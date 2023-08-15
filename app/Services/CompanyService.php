@@ -11,10 +11,24 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Carbon\Carbon;
 
 class CompanyService
 {
+    public function companyLogin()
+    {
+        $credentials = request(['email', 'password']);
+        $myTTL = 60 * 24 * 30; //minutes
 
+        JWTAuth::factory()->setTTL($myTTL);
+        if (!$token = auth()->guard('company-api')->attempt($credentials, ['exp' => Carbon::now()->addDays(30)->timestamp])) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        return $token;
+    }
+    
     public function storeCompany(CompanyRequest $request)
     {
         $company = new Company();
@@ -59,10 +73,12 @@ class CompanyService
     }
 
 
-    public function changeBlockStatus($block_status, $company_id)
+    public function changeBlockStatus(Request $request, $company_id, ProductCompanyService $productService)
     {
+        $productService->blockProductsCompany($request->block_status, $company_id);
+
         $company = Company::find($company_id);
-        $company->blocked = $block_status;
+        $company->blocked = $request->block_status;
         $company->save();
 
         return  $company;
@@ -70,7 +86,6 @@ class CompanyService
 
     public function getCompaniesForMainPage()
     {
-
         return Company::where('blocked', '0')
                 ->withCount('products')
                 ->with(['products'=>function($query){
@@ -81,6 +96,21 @@ class CompanyService
                 }])
                 ->take(5)
                 ->get();
+    }
 
+    public function getShoppingCart(Request $request)
+    {
+        return Company::whereHas('products', function ($query) use ($request) {
+            $query->whereIn('id', explode(',', $request->products_id));
+        })->with(['products' => function ($query) use ($request) {
+            $query->whereIn('id', explode(',', $request->products_id));
+            $query->with('product');
+        }])
+            ->get();
+    }
+
+    public function getAllCompanies()
+    {
+        return Company::withCount('products')->withCount('orders')->paginate();
     }
 }

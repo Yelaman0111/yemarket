@@ -13,10 +13,6 @@ use App\Http\Resources\OrderResource;
 use App\Http\Resources\ProductResource;
 use App\Http\Resources\ShopResource;
 use App\Http\Resources\UserResource;
-use App\Models\Category;
-use App\Models\Company;
-use App\Models\OrderPivot;
-use App\Models\ProductCompany;
 use App\Models\User;
 use App\Services\BrandService;
 use App\Services\CategoryService;
@@ -27,34 +23,22 @@ use App\Services\ProductService;
 use App\Services\ShopService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
 {
-    public function index()
+    public function userLogin(UserService $service)
     {
-        return UserResource::collection(User::all());
+        return $service->userLogin();
+    }
+
+    public function index(UserService $service)
+    {
+        return UserResource::collection($service->getAllUsers());
     }
 
     public function store(UserRequest $request, UserService $service)
     {
-        $user = $service->storeUser($request);
-
-        return new UserResource($user);
-    }
-
-    public function userLogin()
-    {
-        $credentials = request(['email', 'password']);
-        $myTTL = 60 * 24 * 30; //minutes
-
-        JWTAuth::factory()->setTTL($myTTL);
-
-        if (!$token = auth()->guard('user-api')->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
-        return $token;
+        return new UserResource($service->storeUser($request));
     }
 
     public function show(User $user)
@@ -62,38 +46,30 @@ class UserController extends Controller
         return new UserResource($user);
     }
 
-    public function update(UserRequest $request, User $user)
+    public function update(UserRequest $request, User $user, UserService $service)
     {
-
-        $user->update($request->validated());
-
-        return new UserResource($user);
+        return new UserResource($service->updateUser($request, $user));
     }
 
-    public function destroy(User $user)
+    public function destroy(User $user, UserService $service)
     {
-        $user->delete();
+        $service->deleteUser($user);
         return response()->noContent();
     }
 
-
-    public function getAllCompanies()
+    public function getAllCompanies(CompanyService $service)
     {
-        return new CompanyResource(Company::withCount('products')->withCount('orders')->paginate());
+        return new CompanyResource($service->getAllCompanies());
     }
 
     public function blockCompany(Request $request, $id, CompanyService $service, ProductCompanyService $productService)
     {
-
-        $productService->blockProductsCompany($request->block_status, $id);
-
-        return new CompanyResource($service->changeBlockStatus($request->block_status, $id));
+        return new CompanyResource($service->changeBlockStatus($request, $id, $productService));
     }
 
-
-    public function getCompaniesProducts($id)
+    public function getCompaniesProducts($id, ProductCompanyService $productService)
     {
-        return ProductResource::collection(ProductCompany::where('company_id', $id)->with('product')->paginate());
+        return ProductResource::collection($productService->getCompaniesProducts($id));
     }
 
     public function approveCompaniesProducts(Request $request, $id, ProductCompanyService $service)
@@ -125,7 +101,6 @@ class UserController extends Controller
     {
         return $service->store($request);
     }
-
 
     public function getBrands(BrandService $service)
     {

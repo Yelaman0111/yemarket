@@ -9,7 +9,6 @@ use App\Http\Resources\CategoryResource;
 use App\Http\Resources\CompanyResource;
 use App\Http\Resources\CorouselResource;
 use App\Http\Resources\ProductResource;
-use App\Models\Company;
 use App\Models\Corousel;
 use App\Services\CompanyService;
 use App\Services\ProductService;
@@ -43,9 +42,9 @@ class PublicController extends Controller
         return ProductResource::collection($service->searchProducts($request->search_text));
     }
 
-    public function getCompaniesForMainPage(CompanyService $service)
+    public function getSpecificProduct($id, ProductService $service)
     {
-        return CompanyResource::collection($service->getCompaniesForMainPage());
+        return new ProductResource($service->getSpecificProduct($id));
     }
 
     public function getCorousel()
@@ -53,19 +52,13 @@ class PublicController extends Controller
         return CorouselResource::collection(Corousel::all());
     }
 
-    public function getSpecificProduct($id, ProductService $service)
+    public function getCompaniesForMainPage(CompanyService $service)
     {
-        return new ProductResource($service->getSpecificProduct($id));
+        return CompanyResource::collection($service->getCompaniesForMainPage());
     }
 
-    public function getShoppingCart(Request $request, CompanyService $service)
+    public function getShoppingCart(CompanyService $service, Request $request )
     {
-        return Company::whereHas('products', function ($query) use ($request) {
-            $query->whereIn('id', explode(',', $request->products_id));
-        })->with(['products' => function ($query) use ($request) {
-            $query->whereIn('id', explode(',', $request->products_id));
-            $query->with('product');
-        }])
-            ->get();
+        return $service->getShoppingCart($request);
     }
 }

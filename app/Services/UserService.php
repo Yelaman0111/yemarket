@@ -2,71 +2,56 @@
 
 namespace App\Services;
 
-use App\Http\Requests\Admin\AdminOptoshopProductUpdate;
-use App\Http\Requests\Admin\AdminOptoshopUpdate;
-use App\Http\Requests\Admin\AdminProductUpdate;
 use App\Http\Requests\UserRequest;
-use App\Models\Admin;
-use App\Models\OptoShop;
-use App\Models\Product;
-use App\Models\ProductCompany;
+use App\Models\Company;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
-class UserService{
+class UserService
+{
+
+    public function userLogin()
+    {
+        $credentials = request(['email', 'password']);
+        $myTTL = 60 * 24 * 30; //minutes
+
+        JWTAuth::factory()->setTTL($myTTL);
+
+        if (!$token = auth()->guard('user-api')->attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        return $token;
+    }
+
 
     public function storeUser(UserRequest $request): User
     {
         $admin = User::create([
-            'name'=>$request->name,
-            'email'=>$request->email,
-            'password'=>Hash::make($request->password),
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
         ]);
 
         return $admin;
     }
 
-    // public function products()
-    // {
 
-    //     return Product::with('category:id,title,parent_id')
-    //     ->with('brand:id,name')
-    //     ->with(['companiesProduct'=>function($query){
-    //         $query->with('company');
-    //     }])
-    //     ->paginate();
-    // }
-    
-    // public function updateProduct(AdminProductUpdate $request, $id): Product
-    // {
+    public function getAllUsers()
+    {
+        return User::all();
+    }
 
-    //     $product = Product::find($id);
-    //     $product->archived = $request->archived;
-    //     $product->approved = $request->approved;
-    //     $product->save();
+    public function updateUser(UserRequest $request, User $user)
+    {
+        $user->update($request->validated());
+    }
 
-    //     return $product;
-    // }
+    public function deleteUser(User $user)
+    {
+        $user->delete();
+    }
 
-    // public function updateOptoShop(AdminOptoshopUpdate $request, $id): OptoShop
-    // {
-    //     $optoshop = OptoShop::find($id);
-    //     $optoshop->blocked = $request->blocked;
-    //     $optoshop->approved = $request->approved;
-    //     $optoshop->save();
-
-    //     return  $optoshop;
-    // }
-
-    // public function updateOptoShopProduct(AdminOptoshopProductUpdate $request, $id): ProductCompany
-    // {
-
-    //     $productCompany = ProductCompany::find($id);
-    //     $productCompany->archived = $request->archived;
-    //     $productCompany->approved = $request->approved;
-    //     $productCompany->save();
-
-    //     return $productCompany;
-    // }
 
 }

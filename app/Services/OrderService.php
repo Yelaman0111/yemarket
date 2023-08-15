@@ -2,16 +2,20 @@
 
 namespace App\Services;
 
+use App\Http\Requests\OrderRequest;
 use App\Models\Order;
 use App\Models\OrderPivot;
 use App\Models\ProductCompany;
 use PhpOffice\PhpWord\PhpWord;
 use Exception;
+use Illuminate\Http\Request;
 
 class OrderService
 {
-    public function getCompanyOrders($company_id)
+    public function getCompanyOrders()
     {
+        $company_id = auth()->guard('company-api')->user()->id;
+
         $orders = OrderPivot::where('company_id', $company_id)
             ->with('shop')
             ->with(['orders' => function ($query) {
@@ -25,8 +29,10 @@ class OrderService
         return $orders;
     }
 
-    public function getShopOrders($shop_id)
+    public function getShopOrders()
     {
+        $shop_id = auth()->guard('shop-api')->user()->id;
+
         $orders = OrderPivot::where('shop_id', $shop_id)
             ->with('company')
             ->with(['orders' => function ($query) {
@@ -38,6 +44,17 @@ class OrderService
             ->paginate();
 
         return $orders;
+    }
+    public function storeOrder(OrderRequest $request){
+
+        $products_id = explode(',', $request->products_id);
+        $products_count = explode(',', $request->products_count);
+        $user_id = auth()->guard('shop-api')->user()->id;
+
+        $order_pivot = $this->createOrderPivot($products_id, $user_id);
+        $this->createOrder($products_id, $order_pivot, $products_count);
+
+        return OrderPivot::where('id', $order_pivot->id)->with('orders')->first();
     }
 
     public function createOrderPivot($products_id, $user_id)
@@ -65,8 +82,11 @@ class OrderService
         }
     }
 
-    public function acceptOrder($order_id, $company_id)
+    public function acceptOrder(Request $request)
     {
+        $company_id = auth()->guard('company-api')->user()->id;
+        $order_id = $request->id;
+
         $order = OrderPivot::where('id', $order_id)
             ->where('company_id', $company_id)
             ->first();
@@ -77,8 +97,10 @@ class OrderService
         return  $order;
     }
 
-    public function cancelOrder($order_id, $shop_id)
+    public function cancelOrder($order_id)
     {
+        $shop_id = auth()->guard('shop-api')->user()->id;
+
         $order = OrderPivot::where('id', $order_id)
             ->where('shop_id', $shop_id)
             ->first();
@@ -89,8 +111,10 @@ class OrderService
         return  $order;
     }
 
-    public function confirmDeliveryOrder($order_id, $shop_id)
+    public function confirmDeliveryOrder($order_id)
     {
+        $shop_id = auth()->guard('shop-api')->user()->id;
+
         $order = OrderPivot::where('id', $order_id)
             ->where('shop_id', $shop_id)
             ->first();
@@ -101,8 +125,9 @@ class OrderService
         return  $order;
     }
 
-    public function downloadOrder($order_id, $company_id)
+    public function downloadOrder($order_id)
     {
+        $company_id = auth()->guard('company-api')->user()->id;
 
         $companyOrder = OrderPivot::where('id', $order_id)
             ->where('company_id', $company_id)

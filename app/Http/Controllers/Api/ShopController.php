@@ -7,35 +7,21 @@ use App\Http\Requests\OrderRequest;
 use App\Http\Requests\ShopRequest;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\ShopResource;
-use App\Models\OrderPivot;
-use App\Models\Shop;
 use App\Services\OrderService;
 use App\Services\ShopService;
 use Illuminate\Http\Request;
-use Tymon\JWTAuth\Facades\JWTAuth;
-use Carbon\Carbon;
 
 class ShopController extends Controller
 {
 
     public function store(ShopRequest $request, ShopService $service)
     {
-        $shop = $service->storeShop($request);
-
-        return new ShopResource($shop);
+        return new ShopResource($service->storeShop($request));
     }
 
-    public function shopLogin()
+    public function shopLogin(ShopService $service)
     {
-        $credentials = request(['email', 'password']);
-        $myTTL = 60 * 24 * 30; //minutes
-
-        JWTAuth::factory()->setTTL($myTTL);
-        if (!$token = auth()->guard('shop-api')->attempt($credentials, ['exp' => Carbon::now()->addDays(30)->timestamp])) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
-        return $token;
+        return $service->shopLogin();
     }
 
     public function show()
@@ -45,51 +31,32 @@ class ShopController extends Controller
 
     public function update(Request $request, ShopService $service)
     {
-        $id = auth()->guard('shop-api')->user()->id;
-        return new ShopResource($service->update($request, $id));
+        return new ShopResource($service->update($request));
     }
 
-    public function destroy()
+    public function destroy(ShopService $service)
     {
-        $shop = Shop::find(auth()->guard('shop-api')->user()->id);
-        $shop->delete();
+        $service->destroy();
         return response()->noContent();
     }
 
-
     public function storeOrder(OrderRequest $request, OrderService $service)
     {
-        $products_id = explode(',', $request->products_id);
-        $products_count = explode(',', $request->products_count);
-        $user_id = auth()->guard('shop-api')->user()->id;
-
-        $order_pivot = $service->createOrderPivot($products_id, $user_id);
-        $service->createOrder($products_id, $order_pivot, $products_count);
-
-        return new OrderResource(OrderPivot::where('id', $order_pivot->id)->with('orders')->first());
+        return new OrderResource($service->storeOrder($request));
     }
 
     public function getOrders(OrderService $service)
     {
-        $shop_id = auth()->guard('shop-api')->user()->id;
-        return OrderResource::collection($service->getShopOrders($shop_id));
+        return OrderResource::collection($service->getShopOrders());
     }
-
-    // public function getOrder()
-    // {
-    //     $shop_id = auth()->guard('shop-api')->user();
-    //     return OrderResource::collection($service->getShopOrders($shop_id));
-    // }
 
     public function cancelOrder($id, OrderService $service)
     {
-        $shop_id = auth()->guard('shop-api')->user()->id;
-        return new OrderResource($service->cancelOrder($id, $shop_id));
+        return new OrderResource($service->cancelOrder($id));
     }
 
     public function confirmDeliveryOrder($id, OrderService $service)
     {
-        $shop_id = auth()->guard('shop-api')->user()->id;
-        return new OrderResource($service->confirmDeliveryOrder($id, $shop_id));
+        return new OrderResource($service->confirmDeliveryOrder($id));
     }
 }

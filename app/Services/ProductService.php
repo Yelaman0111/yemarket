@@ -44,8 +44,10 @@ class ProductService
             ->paginate();
     }
 
-    public function getCompanyAllProducts($company_id)
+    public function getCompanyAllProducts()
     {
+        $company_id = auth()->guard('company-api')->user()->id;
+
         return Product::whereHas('companiesProduct', function ($query) use ($company_id) {
             $query->where('company_id',  $company_id);
         })
@@ -61,8 +63,10 @@ class ProductService
     }
 
 
-    public function searchProductOfCompany($search_text, $company_id)
+    public function searchProductOfCompany($search_text)
     {
+        $company_id = auth()->guard('company-api')->user()->id;
+
         return Product::where('name', 'like', '%' . $search_text . '%')
             ->whereHas('companiesProduct', function ($query) use ($company_id) {
                 $query->where('company_id',  $company_id);
@@ -77,9 +81,14 @@ class ProductService
 
     public function searchProductForConnect($search_text)
     {
-        return Product::where('name', 'like', '%' . $search_text . '%')
+
+        if ($search_text != '') {
+            return Product::where('name', 'like', '%' . $search_text . '%')
             ->where('approved', '1')
             ->paginate();
+        } else {
+            return response()->noContent();
+        }
     }
 
 

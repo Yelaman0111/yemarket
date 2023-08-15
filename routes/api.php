@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-
 Route::group(['prefix' => 'v1'], function () {
 
     Route::get('categories', [App\Http\Controllers\Api\PublicController::class, 'getCategories'])->name('getCategories');
@@ -73,10 +72,8 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('show', [App\Http\Controllers\Api\ShopController::class, 'show']);
             Route::post('update', [App\Http\Controllers\Api\ShopController::class, 'update']);
             Route::post('destroy', [App\Http\Controllers\Api\ShopController::class, 'destroy']);
-
             Route::post('orders', [App\Http\Controllers\Api\ShopController::class, 'storeOrder']);
             Route::get('orders', [App\Http\Controllers\Api\ShopController::class, 'getOrders']);
-            // Route::get('orders/{order_id}', [App\Http\Controllers\Api\ShopController::class, 'getOrder']);
             Route::get('orders/{id}/cancel', [App\Http\Controllers\Api\ShopController::class, 'cancelOrder']);
             Route::get('orders/{id}/confirmdelivery', [App\Http\Controllers\Api\ShopController::class, 'confirmDeliveryOrder']);
         });
