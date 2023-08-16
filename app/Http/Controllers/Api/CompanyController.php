@@ -72,7 +72,7 @@ class CompanyController extends Controller
     {
         $service->storeProductCompany($request);
 
-        response()->json(['success' => 'success'], 200);
+        return response()->json(['success' => 'success'], 200);
     }
 
     public function searchProductOfCompany(SearchProdutsRequest $request, ProductService $service)

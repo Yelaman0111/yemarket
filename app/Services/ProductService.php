@@ -5,184 +5,88 @@ namespace App\Services;
 use App\Http\Requests\ProductRequest;
 use App\Models\Product;
 use App\Models\ProductCompany;
+use App\Repositories\Interfaces\ProductRepositoryInterface;
 use GuzzleHttp\Psr7\Request;
 
 class ProductService
 {
+    private $productRepository;
+
+    public function __construct(ProductRepositoryInterface $productRepository)
+    {
+        $this->productRepository = $productRepository;
+    }
+
     public function storeProduct(ProductRequest $request)
     {
-        $product = new Product();
-        $imageName = '';
-
-        if ($image = $request->file('image')) {
-            $imageName = time() . "." . $image->extension();
-            $image->move(public_path('uploads/products'), $imageName);
-            $product->image       =  $imageName;
-        }
-
-        $product->category_id       =  $request->category_id;
-        $product->brand_id          =  $request->brand_id;
-        $product->name              =  $request->name;
-        $product->description       =  $request->description;
-        $product->save();
-
-        return $product;
+        return $this->productRepository->storeProduct($request);
     }
 
     public function getCompanyProducts($company_id)
     {
-        return Product::whereHas('companiesProduct', function ($query) use ($company_id) {
-            $query->where('approved',  '1');
-            $query->where('company_id',  $company_id);
-        })
-            ->with(['companiesProduct' => function ($query) use ($company_id) {
-                $query->orderBy('price', 'asc');
-                $query->where('approved', '1');
-                $query->where('company_id', $company_id);
-                $query->with('company');
-            }])
-            ->paginate();
+        return $this->productRepository->getCompanyProducts($company_id);
     }
 
     public function getCompanyAllProducts()
     {
         $company_id = auth()->guard('company-api')->user()->id;
 
-        return Product::whereHas('companiesProduct', function ($query) use ($company_id) {
-            $query->where('company_id',  $company_id);
-        })
-            ->with(['companiesProduct' => function ($query) use ($company_id) {
-                $query->orderBy('price', 'asc');
-                $query->where('company_id', $company_id);
-            }])
-            ->paginate();
-    }
-    public function getApprovedProductsWithoutCompanyProducts()
-    {
-        return Product::where('approved',  '1')->paginate();
+        return $this->productRepository->getCompanyAllProducts($company_id);
     }
 
+    public function getApprovedProductsWithoutCompanyProducts()
+    {
+        return $this->productRepository->getApprovedProductsWithoutCompanyProducts();
+    }
 
     public function searchProductOfCompany($search_text)
     {
         $company_id = auth()->guard('company-api')->user()->id;
 
-        return Product::where('name', 'like', '%' . $search_text . '%')
-            ->whereHas('companiesProduct', function ($query) use ($company_id) {
-                $query->where('company_id',  $company_id);
-            })
-            ->with(['companiesProduct' => function ($query) use ($company_id) {
-                $query->orderBy('price', 'asc');
-                $query->where('company_id', $company_id);
-            }])
-            ->paginate();
+        return $this->productRepository->searchProductOfCompany($search_text, $company_id);
     }
-
 
     public function searchProductForConnect($search_text)
     {
-
         if ($search_text != '') {
-            return Product::where('name', 'like', '%' . $search_text . '%')
-            ->where('approved', '1')
-            ->paginate();
+            return $this->productRepository->searchProductForConnect($search_text);
         } else {
             return response()->noContent();
         }
     }
 
-
     public function getAllProducts()
     {
-        return Product::with('brand', 'category')
-            ->with(['companiesProduct' => function ($query) {
-                $query->where('approved', 1);
-                $query->orderBy('price', 'asc');
-                $query->with('company');
-            }])->paginate();
+        return $this->productRepository->getAllProducts();
     }
 
     public function changeApprovedStatus($approved_status, $id)
     {
-        $productCompany = Product::find($id);
-        $productCompany->approved = $approved_status;
-        $productCompany->save();
-
-        return  $productCompany;
+        return $this->productRepository->changeApprovedStatus($approved_status, $id);
     }
 
     public function getProductsByCategory($category_id)
     {
-        return Product::where('category_id', $category_id)->where('approved', '1')
-            ->whereHas('companiesProduct', function ($query) {
-                $query->where('approved', '1');
-            })
-            ->with(['companiesProduct' => function ($query) {
-                $query->orderBy('price', 'asc');
-                $query->where('approved', '1');
-                $query->with(['company']);
-            }])->paginate(10);
+        return $this->productRepository->getProductsByCategory($category_id);
     }
 
     public function getProductsByBrand($brand_id)
     {
-        return Product::where('brand_id', $brand_id)->where('approved', '1')
-            ->whereHas('companiesProduct', function ($query) {
-                $query->where('approved', '1');
-            })
-            ->with(['companiesProduct' => function ($query) {
-                $query->orderBy('price', 'asc');
-                $query->where('approved', '1');
-                $query->with(['company']);
-            }])
-            ->paginate();
+        return $this->productRepository->getProductsByBrand($brand_id);
     }
 
     public function getProductsByCompany($company_id)
     {
-        return Product::where('approved', '1')
-            ->whereHas('companiesProduct', function ($query) use ($company_id) {
-                $query->where('approved',  '1');
-                $query->where('company_id',  $company_id);
-            })
-            ->with(['companiesProduct' => function ($query) use ($company_id) {
-                $query->orderBy('price', 'asc');
-                $query->where('approved', '1');
-                $query->where('company_id', $company_id);
-                $query->with('company');
-            }])
-            ->paginate();
+        return $this->productRepository->getProductsByCompany($company_id);
     }
 
     public function searchProducts($search_text)
     {
-
-        return Product::where('name', 'like', '%' . $search_text . '%')
-            ->where('approved', '1')
-            ->whereHas('companiesProduct', function ($query) {
-                $query->where('approved', '1');
-            })
-            ->with(['companiesProduct' => function ($query) {
-                $query->orderBy('price', 'asc');
-                $query->where('approved', '1');
-                $query->with(['company']);
-            }])
-            ->paginate();
+        return $this->productRepository->searchProducts($search_text);
     }
 
     public function getSpecificProduct($id)
     {
-        return Product::where('approved', '1')
-            ->where('id', $id)
-            ->whereHas('companiesProduct', function ($query) {
-                $query->where('approved', '1');
-            })
-            ->with(['companiesProduct.company', 'companiesProduct' => function ($query) {
-                $query->orderBy('price', 'asc');
-                $query->where('approved', '1');
-            }])
-            ->with('brand')
-            ->with('category')
-            ->get();
+        return $this->productRepository->getSpecificProduct($id);
     }
 }

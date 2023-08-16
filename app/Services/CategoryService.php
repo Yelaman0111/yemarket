@@ -2,83 +2,45 @@
 
 namespace App\Services;
 
-use App\Http\Requests\Category\StoreCategoryRequest;
-use App\Http\Requests\Category\UpdateCategoryRequest;
 use App\Http\Requests\CategoryRequest;
-use App\Models\Category;
+use App\Repositories\Interfaces\CategoryRepositoryInterface;
 
 class CategoryService
 {
+    private $categoryRepository;
+
+    public function __construct(CategoryRepositoryInterface $categoryRepository)
+    {
+        $this->categoryRepository = $categoryRepository;
+    }
 
     public function store(CategoryRequest $request)
     {
-        $category = new Category();
-
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $imageName = time() . "." . $file->extension();
-            $file->move(public_path('uploads/category'), $imageName);
-            $category->image = $imageName;
-        }
-
-        $category->title = $request->title;
-        $category->parent_id = $request->parent_id;
-        $category->save();
-
-        return $category;
+        return $this->categoryRepository->store($request);
     }
 
     public function update(CategoryRequest $request, $id)
     {
-        $category = Category::find($id);
-
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $imageName = time() . "." . $file->extension();
-            $file->move(public_path('uploads/category'), $imageName);
-            $category->image = $imageName;
-        }
-
-        $category->title = $request->title;
-        $category->parent_id = $request->parent_id;
-        $category->save();
-
-        return $category;
+        return $this->categoryRepository->update($request, $id);
     }
 
     public function getCategoriesHasProducts()
     {
-        return Category::where('parent_id', 0)
-            ->whereHas('childCategories', function ($q) {
-                $q->whereHas('products', function ($q) {
-                    $q->whereHas('companiesProduct');
-                });
-            })->with('childCategories', function ($q) {
-                $q->whereHas('products', function ($q) {
-                    $q->whereHas('companiesProduct');
-                });
-            })->get();
+        return $this->categoryRepository->getCategoriesHasProducts();
     }
 
     public function getCategoriesAll()
     {
-        return Category::where('parent_id', 0)
-            ->whereHas('childCategories')
-            ->with('childCategories')->get();
+        return $this->categoryRepository->getCategoriesAll();
     }
-
 
     public function getAllCategories()
     {
-        return Category::where('parent_id', 0)
-            ->with('childCategories', function ($q) {
-                $q->withCount('products');
-            })->get();
+        return $this->categoryRepository->getAllCategories();
     }
 
     public function getParentCategories()
     {
-        return Category::where('parent_id', 0)->get();
+        return $this->categoryRepository->getParentCategories();
     }
-
 }

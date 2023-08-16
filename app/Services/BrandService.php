@@ -3,51 +3,29 @@
 namespace App\Services;
 
 use App\Http\Requests\BrandRequest;
-use App\Http\Requests\CategoryRequest;
-use App\Models\Brand;
-use App\Models\Category;
+use App\Repositories\Interfaces\BrandRepositoryInterface;
 
 class BrandService
 {
+    private $brandRepository;
+
+    public function __construct(BrandRepositoryInterface $brandRepository)
+    {
+        $this->brandRepository = $brandRepository;
+    }
 
     public function store(BrandRequest $request)
     {
-        $brand = new Brand();
-
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $imageName = time() . "." . $file->extension();
-            $file->move(public_path('uploads/brands'), $imageName);
-            $brand->image = $imageName;
-        }
-
-        $brand->name = $request->name;
-        $brand->save();
-
-        return $brand;
+        return $this->brandRepository->store($request);
     }
+
     public function update(BrandRequest $request, $id)
     {
-        $brand = Brand::find($id);
-
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $imageName = time() . "." . $file->extension();
-            $file->move(public_path('uploads/brands'), $imageName);
-            $brand->image = $imageName;
-        }
-
-        $brand->name = $request->name;
-        $brand->save();
-
-        return $brand;
+        return $this->brandRepository->update($request, $id);
     }
-
-
 
     public function getBrands()
     {
-        return Brand::all();
+        return $this->brandRepository->all();
     }
-
 }

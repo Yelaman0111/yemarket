@@ -5,11 +5,18 @@ namespace App\Services;
 use App\Http\Requests\UserRequest;
 use App\Models\Company;
 use App\Models\User;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserService
 {
+    private $userRepository;
+
+    public function __construct(UserRepositoryInterface $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
 
     public function userLogin()
     {
@@ -28,30 +35,22 @@ class UserService
 
     public function storeUser(UserRequest $request): User
     {
-        $admin = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        return $admin;
+        return $this->userRepository->storeUser($request);
     }
 
 
     public function getAllUsers()
     {
-        return User::all();
+        return $this->userRepository->getAllUsers();
     }
 
     public function updateUser(UserRequest $request, User $user)
     {
-        $user->update($request->validated());
+        $this->userRepository->updateUser($request, $user);
     }
 
     public function deleteUser(User $user)
     {
-        $user->delete();
+        $this->userRepository->deleteUser($user);
     }
-
-
 }

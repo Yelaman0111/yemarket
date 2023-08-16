@@ -6,47 +6,39 @@ use App\Http\Requests\OrderRequest;
 use App\Models\Order;
 use App\Models\OrderPivot;
 use App\Models\ProductCompany;
+use App\Repositories\Interfaces\OrderRepositoryInterface;
+use App\Repositories\Interfaces\ProductCompanyRepositoryInterface;
 use PhpOffice\PhpWord\PhpWord;
 use Exception;
 use Illuminate\Http\Request;
 
 class OrderService
 {
+    private $orderRepository;
+    private $productCompanyRepository;
+
+    public function __construct(OrderRepositoryInterface $orderRepository, ProductCompanyRepositoryInterface $productCompanyRepository)
+    {
+        $this->orderRepository = $orderRepository;
+        $this->productCompanyRepository = $productCompanyRepository;
+    }
+
     public function getCompanyOrders()
     {
         $company_id = auth()->guard('company-api')->user()->id;
 
-        $orders = OrderPivot::where('company_id', $company_id)
-            ->with('shop')
-            ->with(['orders' => function ($query) {
-                $query->with(['productCompany' => function ($query) {
-                    $query->with('product');
-                }]);
-            }])
-            ->orderBy('created_at', 'desc')
-            ->paginate();
-
-        return $orders;
+        return $this->orderRepository->getCompanyOrders($company_id);
     }
 
     public function getShopOrders()
     {
         $shop_id = auth()->guard('shop-api')->user()->id;
 
-        $orders = OrderPivot::where('shop_id', $shop_id)
-            ->with('company')
-            ->with(['orders' => function ($query) {
-                $query->with(['productCompany' => function ($query) {
-                    $query->with('product');
-                }]);
-            }])
-            ->orderBy('created_at', 'desc')
-            ->paginate();
-
-        return $orders;
+        return $this->orderRepository->getShopOrders($shop_id);
     }
-    public function storeOrder(OrderRequest $request){
 
+    public function storeOrder(OrderRequest $request)
+    {
         $products_id = explode(',', $request->products_id);
         $products_count = explode(',', $request->products_count);
         $user_id = auth()->guard('shop-api')->user()->id;
@@ -54,31 +46,20 @@ class OrderService
         $order_pivot = $this->createOrderPivot($products_id, $user_id);
         $this->createOrder($products_id, $order_pivot, $products_count);
 
-        return OrderPivot::where('id', $order_pivot->id)->with('orders')->first();
+        return $this->orderRepository->getOrderById($order_pivot->id);
     }
 
     public function createOrderPivot($products_id, $user_id)
     {
-        $order_pivot = new OrderPivot();
-        $order_pivot->shop_id = $user_id;
-        $order_pivot->company_id   = ProductCompany::where('id', $products_id[0])->pluck('company_id')->first();
-        $order_pivot->status        = 1;
-        $order_pivot->save();
-
-        return $order_pivot;
+        return $this->orderRepository->createOrderPivot($products_id, $user_id);
     }
 
     public function createOrder($products_id, $order_pivot, $products_count)
     {
-        $company_product_find = ProductCompany::whereIn('id', $products_id)->with('company')->get();
+        $company_product_find = $this->productCompanyRepository->getProuctCompaniesByIds($products_id);
 
         foreach ($products_id as $key => $product_id) {
-            $order = new Order();
-            $order->order_id = $order_pivot->id;
-            $order->product_id = $company_product_find[$key]->id;
-            $order->count = $products_count[$key];
-            $order->price = $company_product_find[$key]->price;
-            $order->save();
+            $this->orderRepository->createOrder($order_pivot, $products_count, $company_product_find, $key);
         }
     }
 
@@ -87,57 +68,28 @@ class OrderService
         $company_id = auth()->guard('company-api')->user()->id;
         $order_id = $request->id;
 
-        $order = OrderPivot::where('id', $order_id)
-            ->where('company_id', $company_id)
-            ->first();
-
-        $order->status = 2;
-        $order->save();
-
-        return  $order;
+        return $this->orderRepository->acceptOrder($company_id, $order_id);
     }
 
     public function cancelOrder($order_id)
     {
         $shop_id = auth()->guard('shop-api')->user()->id;
 
-        $order = OrderPivot::where('id', $order_id)
-            ->where('shop_id', $shop_id)
-            ->first();
-
-        $order->status = 0;
-        $order->save();
-
-        return  $order;
+        return $this->orderRepository->cancelOrder($shop_id, $order_id);
     }
 
     public function confirmDeliveryOrder($order_id)
     {
         $shop_id = auth()->guard('shop-api')->user()->id;
 
-        $order = OrderPivot::where('id', $order_id)
-            ->where('shop_id', $shop_id)
-            ->first();
-
-        $order->status = 3;
-        $order->save();
-
-        return  $order;
+        return $this->orderRepository->confirmDeliveryOrder($shop_id, $order_id);
     }
 
     public function downloadOrder($order_id)
     {
         $company_id = auth()->guard('company-api')->user()->id;
 
-        $companyOrder = OrderPivot::where('id', $order_id)
-            ->where('company_id', $company_id)
-            ->with('company', 'shop')
-            ->with(['orders' => function ($query) {
-                $query->with(['productCompany' => function ($query) {
-                    $query->with('product');
-                }]);
-            }])
-            ->first();
+        $companyOrder = $this->orderRepository->getOrderByIdAndCompanyId($company_id, $order_id);
 
         $phpWord = new PhpWord();
         $section = $phpWord->addSection();

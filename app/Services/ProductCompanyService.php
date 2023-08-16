@@ -4,27 +4,26 @@ namespace App\Services;
 
 use App\Http\Requests\ProductCompanyRequest;
 use App\Models\ProductCompany;
+use App\Repositories\Interfaces\ProductCompanyRepositoryInterface;
 
 class ProductCompanyService
 {
+
+    private $productCompanyRepository;
+
+    public function __construct(ProductCompanyRepositoryInterface $productCompanyRepository)
+    {
+        $this->productCompanyRepository = $productCompanyRepository;
+    }
+
     public function storeProductCompany(ProductCompanyRequest $request)
     {
         $company_id = auth()->guard('company-api')->user()->id;
 
-        $checkExists = ProductCompany::where('company_id', $company_id)->where('product_id', $request->product_id)->first();
-
+        $checkExists = $this->productCompanyRepository->checkExists($request->product_id, $company_id);
 
         if (!$checkExists) {
-
-            $productCompany = ProductCompany::create([
-                'company_id' => $company_id,
-                'product_id' => $request->product_id,
-                'price' => $request->price,
-                'sku' => $request->sku,
-                'min_order_count' => $request->min_order_count,
-            ]);
-
-            return $productCompany;
+            return $this->productCompanyRepository->storeProductCompany($request, $company_id);
         }
 
         return response()->json(['error' => 'error'], 400);
@@ -32,22 +31,16 @@ class ProductCompanyService
 
     public function changeApprovedStatus($product_id, $approved_status)
     {
-        $productCompany = ProductCompany::find($product_id);
-        $productCompany->approved = $approved_status;
-        $productCompany->save();
-
-        return  $productCompany;
+        return $this->productCompanyRepository->changeApprovedStatus($product_id, $approved_status);
     }
-
 
     public function blockProductsCompany($block_status, $id)
     {
-        ProductCompany::where('company_id', '=', $id)
-            ->update(['approved' => !$block_status]);
+        $this->productCompanyRepository->changeApprovedStatus($id, !$block_status);
     }
 
     public function getCompaniesProducts($id)
     {
-        ProductCompany::where('company_id', $id)->with('product')->paginate();
+       return $this->productCompanyRepository->getCompaniesProducts($id);
     }
 }
